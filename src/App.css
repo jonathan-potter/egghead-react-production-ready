@@ -40,3 +40,7 @@ ul {
 li {
   list-style: none;
 }
+
+.error-message {
+  color: rgba(255, 0, 0, 0.5);
+}
