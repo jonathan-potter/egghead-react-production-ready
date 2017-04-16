@@ -17,8 +17,28 @@ export default {
       },
       body: JSON.stringify(todo)
     }).then(response => response.json())
-  }
+  },
 
+  update(todo) {
+    return fetch(`${BASE_URL}/${todo.id}`, {
+      method: 'PUT',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(todo)
+    }).then(response => response.json())
+  },
+
+  destroy(id) {
+    return fetch(`${BASE_URL}/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      }
+    })
+  }
 }
 
 export const generateId = () => floor(random() * 10000000000)

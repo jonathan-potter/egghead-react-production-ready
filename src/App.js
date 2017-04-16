@@ -4,6 +4,7 @@ import './App.css'
 import TodoForm from './components/TodoForm'
 import TodoList from './components/TodoList'
 import ErrorMessage from './components/ErrorMessage'
+import Message from './components/Message'
 import Footer from './components/Footer'
 import Todo, {
   addTodo,
@@ -23,7 +24,8 @@ export default class App extends Component {
   state = {
     todos: [],
     currentTodo: '',
-    errorMessage: ''
+    errorMessage: '',
+    message: ''
   }
 
   componentDidMount () {
@@ -32,7 +34,7 @@ export default class App extends Component {
 
   render () {
     const { route } = this.context
-    const { currentTodo, errorMessage, todos } = this.state
+    const { currentTodo, errorMessage, message, todos } = this.state
 
     const submitHandler = currentTodo ? this.handleSubmit : this.handleEmptySubmit
     const todosToDisplay = filterTodosForRoute(todos, route)
@@ -45,6 +47,7 @@ export default class App extends Component {
         </header>
         <section className='app-body'>
           <ErrorMessage message={errorMessage} />
+          <Message message={message} />
           <TodoForm handleInputChange={this.handleInputChange} handleSubmit={submitHandler} currentTodo={currentTodo} />
           <TodoList todos={todosToDisplay} handleToggle={this.handleToggle} handleRemove={this.handleRemove} />
         </section>
@@ -57,6 +60,13 @@ export default class App extends Component {
     this.setState({
       currentTodo: event.target.value
     })
+  }
+
+  setTemporaryMessage = message => {
+    this.setState({ message })
+    setTimeout(() => {
+      this.setState({ message: ''})
+    }, 2500)
   }
 
   handleSubmit = (event) => {
@@ -72,23 +82,28 @@ export default class App extends Component {
     })
 
     Todo.create(newTodo)
+      .then(() => this.setTemporaryMessage('Todo added'))
   }
 
   handleToggle = id => {
     const { todos } = this.state
 
-    const todo = findById(todos, id)
+    const toggledTodo = toggleTodo(findById(todos, id))
 
     this.setState({
-      todos: updateTodo(todos, toggleTodo(todo))
+      todos: updateTodo(todos, toggledTodo)
     })
+
+    Todo.update(toggledTodo)
+      .then(() => this.setTemporaryMessage('Todo updated'))
   }
 
   handleEmptySubmit = (event) => {
     event.preventDefault()
 
     this.setState({
-      errorMessage: 'Please set a new todo name'
+      errorMessage: 'Please set a new todo name',
+      message: ''
     })
   }
 
@@ -100,5 +115,8 @@ export default class App extends Component {
     this.setState({
       todos: removeTodo(todos, id)
     })
+
+    Todo.destroy(id)
+      .then(() => this.setTemporaryMessage('Todo removed'))
   }
 }
