@@ -1,17 +1,21 @@
 import React from 'react'
 
-export default function TodoList ({ todos }) {
+export default function TodoList ({ todos, handleRemove, handleToggle }) {
   return (
     <ul>
-      { todos.map(todo => <TodoItem {...todo} key={todo.id} />) }
+      { todos.map(todo => <TodoItem {...todo} handleToggle={handleToggle} key={todo.id} handleRemove={handleRemove} />) }
     </ul>
   )
 }
 
-function TodoItem ({ isComplete, name }) {
+function TodoItem ({ id, isComplete, handleRemove, handleToggle, name }) {
+  const onClickCheckbox = () => handleToggle(id)
+  const onClickRemove = handleRemove.bind(null, id)
+
   return (
     <li>
-      <input type='checkbox' defaultChecked={isComplete} />
+      <button onClick={onClickRemove}>x</button>
+      <input type='checkbox' onClick={onClickCheckbox} checked={isComplete} />
       {name}
     </li>
   )
