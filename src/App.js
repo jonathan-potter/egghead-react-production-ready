@@ -5,6 +5,15 @@ import TodoForm from './components/TodoForm'
 import TodoList from './components/TodoList'
 import ErrorMessage from './components/ErrorMessage'
 import Footer from './components/Footer'
+import Todo, {
+  addTodo,
+  createTodo,
+  findById,
+  toggleTodo,
+  updateTodo,
+  removeTodo,
+  filterTodosForRoute
+} from './server/todoService'
 
 export default class App extends Component {
   static contextTypes = {
@@ -12,13 +21,13 @@ export default class App extends Component {
   }
 
   state = {
-    todos: [
-      { id: 4, name: 'rawr', isComplete: false},
-      { id: 7, name: 'stuff', isComplete: true},
-      { id: 2, name: 'things', isComplete: false}
-    ],
+    todos: [],
     currentTodo: '',
     errorMessage: ''
+  }
+
+  componentDidMount () {
+    Todo.all().then(todos => this.setState({ todos }))
   }
 
   render () {
@@ -54,12 +63,15 @@ export default class App extends Component {
     event.preventDefault()
 
     const { todos, currentTodo } = this.state
+    const newTodo = createTodo({ name: currentTodo })
 
     this.setState({
-      todos: addTodo(todos, createTodo({ name: currentTodo })),
+      todos: addTodo(todos, newTodo),
       currentTodo: '',
       errorMessage: ''
     })
+
+    Todo.create(newTodo)
   }
 
   handleToggle = id => {
@@ -88,38 +100,5 @@ export default class App extends Component {
     this.setState({
       todos: removeTodo(todos, id)
     })
-  }
-}
-
-let currentId = 0
-const addTodo = (currentList, newTodo) => currentList.concat(newTodo)
-const createTodo = ({ name }) => ({ id: currentId++, name, isComplete: false })
-const findById = (list, id) => list.find(todo => todo.id === id)
-const toggleTodo = todo => ({ ...todo, isComplete: !todo.isComplete })
-const updateTodo = (list, updatedTodo) => {
-  const updatedIndex = list.findIndex(todo => todo.id === updatedTodo.id)
-
-  return [
-    ...list.slice(0, updatedIndex),
-    updatedTodo,
-    ...list.slice(updatedIndex + 1)
-  ]
-}
-const removeTodo = (list, id) => {
-  const removedIndex = list.findIndex(todo => todo.id === id)
-
-  return [
-    ...list.slice(0, removedIndex),
-    ...list.slice(removedIndex + 1)
-  ]
-}
-const filterTodosForRoute = (todos, route) => {
-  switch (route) {
-    case '/active':
-      return todos.filter(todo => !todo.isComplete)
-    case '/complete':
-      return todos.filter(todo => todo.isComplete)
-    default:
-      return todos
   }
 }
